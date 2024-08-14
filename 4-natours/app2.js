@@ -8,7 +8,10 @@ const tourRouter = require('./routes/tourRoutes');
 //2. Express 앱생성
 const app = express();
 
+console.log(process.env.NODE_ENV);
+
 if (process.env.NODE_ENV === 'development') {
+  // 개발모드 확인
   app.use(morgan('dev')); // http 요청을 개발모드로 ...메서드,url,상태코드 등을 로그로 출력
 }
 
