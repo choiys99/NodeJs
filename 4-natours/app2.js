@@ -1,119 +1,33 @@
-const fs = require('fs');
+// 1  모듈 불러오기
 const express = require('express');
 const morgan = require('morgan');
 
+const userRouter = require('./routes/userRotues');
+const tourRouter = require('./routes/tourRoutes');
+
+//2. Express 앱생성
 const app = express();
 
-// 1.미들웨어
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); // http 요청을 개발모드로 ...메서드,url,상태코드 등을 로그로 출력
+}
 
-app.use(express.json());
+//3.미들웨어 설정
 
+app.use(express.json()); // json 형식의 요청 본문을 파싱..
+app.use(express.static(`${__dirname}/public`)); //
 app.use((req, res, next) => {
+  // 요청이 들어올 때 마다 실행
   console.log('미들웨어 입니다.');
   req.requestTime = new Date().toISOString();
   next();
 });
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
+// 경로 핸들러
 
-const getAllTours = (req, res) => {
-  res.status(200).json({
-    status: '썽꽁',
-    requestedAt: req.requestTime,
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-};
+// 경로
 
-const getTour = (req, res) => {
-  console.log(req.params);
+app.use('/api/v1/tours', tourRouter); // /api/v1/tours 경로로 들어오는 요청을 tourRouter 에 연결
+app.use('/api/v1/users', userRouter);
 
-  const id = req.params.id * 1;
-  const tour = tours.find((el) => el.id === id);
-
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: '찾을수 없ㅅ브',
-    });
-  }
-
-  res.status(200).json({
-    status: '썽꽁',
-    data: {
-      tour,
-    },
-  });
-};
-
-const createTour = (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
-
-  tours.push(newTour);
-
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: '성공',
-        data: {
-          tours: newTour,
-        },
-      });
-    }
-  );
-};
-
-const deleteTour = (req, res) => {
-  if (!req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: '찾을수 없ㅅ브',
-    });
-  }
-
-  res.status(204).json({
-    statis: '성공',
-    data: null,
-  });
-};
-
-const updateTour = (req, res) => {
-  if (!req.params.id * 1 > tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: '찾을수 없ㅅ브',
-    });
-  }
-
-  res.status(200).json({
-    data: {
-      tour: '<Updated tour here...>',
-    },
-  });
-};
-
-// app.get('/api/v1/tours', getAllTours);
-// app.post('/api/v1/tours', createTour);
-// app.get('/api/v1/tours/:id', getTour);
-// app.patch('/api/v1/tour/:id', updateTour);
-// app.delete('/api/v1/tour/:id', deleteTour);
-
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
-
-app
-  .route('/api/v1/tours/:id')
-  .get(getTour)
-  .patch(updateTour)
-  .delete(deleteTour);
-
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
+module.exports = app;
