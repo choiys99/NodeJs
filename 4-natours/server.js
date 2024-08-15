@@ -1,7 +1,22 @@
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-
-const app = require('./app2');
 dotenv.config({ path: './config.env' }); // 여기서 파일의 변수 읽기가 nojs에 의해 한번만 발생하면됨
+const app = require('./app2');
+
+const DB = process.env.DATABASE.replace(
+  '<PASSWORD>',
+  process.env.DATABASE_PASSWORD,
+);
+mongoose
+  .connect(DB, {
+    useNewURLParser: true,
+    // useCreateIndex: true,
+    // useFindAndModify: false,
+  })
+  .then(() => {
+    // console.log(con.connections);
+    console.log('연결에 성공했습니다.');
+  });
 
 // console.log(app.get('env')); // express에서 현재 환경 설정을 출력
 // console.log(process.env); //  Node.js에서 현재 프로세스의 환경 변수를 출력
