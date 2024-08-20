@@ -1,5 +1,7 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
+const { json } = require('express');
+const { match } = require('assert');
 
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
@@ -30,7 +32,34 @@ const Tour = require('./../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    // const tours = await Tour.find({
+    //   duration: 5,
+    //   difficulty: 'easy',
+    // });
+
+    // const tours = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+
+    // 쿼리 작성
+    // 1) 필터링
+    const queryObj = { ...req.query }; // 객체에서 모든 값을 가져옴
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // 2) 고급 필터링
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    console.log(JSON.parse(queryStr));
+
+    const query = await Tour.find(JSON.parse(queryStr));
+
+    //쿼리 실행
+    const tours = await query;
+
+    // 응답 보내기
     res.status(200).json({
       status: '썽꽁',
       results: tours.length,

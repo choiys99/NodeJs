@@ -9,7 +9,8 @@ const DB = process.env.DATABASE.replace(
 );
 mongoose
   .connect(DB, {
-    useNewURLParser: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
   .then(() => {
     // console.log(con.connections);
