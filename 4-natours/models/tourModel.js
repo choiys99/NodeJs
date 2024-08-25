@@ -88,11 +88,22 @@ tourSchema.pre('save', function (next) {
 // });
 
 // 쿼리 미들웨어
-tourSchema.pre('find', function (next) {
+tourSchema.pre(/^find/, function (next) {
+  // find로 시작하는 모든 명령어 실행
   // 여기서 this는 문서가 아닌 쿼리를 가르킨다.
+  this.find({ secretTour: { $ne: true } }); // true가 아닌것
 
+  this.start = Date.now();
   next();
 });
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Quert took ${Date.now() - this.start} millisecnds`);
+  console.log(docs);
+  next();
+});
+
+//집계 미들웨어
 
 const Tour = mongoose.model('Tour', tourSchema);
 
