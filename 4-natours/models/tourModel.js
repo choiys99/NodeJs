@@ -7,6 +7,9 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, '이름이 빠졋오'],
       unique: true,
+      trim: true,
+      maxlength: [40, '40자 이하여야 합니다.'],
+      minlength: [10, '10자 이상여야 합니다.'],
     },
     slug: String,
     duration: {
@@ -20,10 +23,16 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, '난이도 설정이 빠졌습니다.'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: '난이도는 쉬움 중간 어려움 중 하나입니다.',
+      },
     },
     ratingsAverage: {
       type: Number,
       default: 0,
+      min: [1, '최소 점수는 1 이상 입니다.'],
+      max: [5, '최대 점수는 5 이하 입니다.'],
     },
     ratingsQuantity: {
       type: Number,
@@ -33,7 +42,15 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, '가격이 빠졋오'],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          return val < this.price; // 100 < 200
+        },
+        message: '할인가격은 판매가({VALUE}) 보다 낮으면 안됩니다.',
+      },
+    },
     summery: {
       type: String,
       trim: [true, '설명이 빠졌습니다.'],
@@ -72,6 +89,7 @@ tourSchema.virtual('durationWeeks').get(function () {
 //문서 미들웨어 : 저장하기 전에 특정 작업을 수행하는 코드
 // 여기서 pre 메서드는 특정 이벤트가 발생하기 전에 실행할 함수를 정의합니다.
 //'save' 이벤트는 문서가 데이터베이스에 저장되기 전에 호출
+// save,create 만 실행 // 업데이트는안됨
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
@@ -104,6 +122,12 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 //집계 미들웨어
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  console.log(this.pipeline());
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
