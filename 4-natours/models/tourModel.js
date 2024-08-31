@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -10,6 +11,7 @@ const tourSchema = new mongoose.Schema(
       trim: true,
       maxlength: [40, '40자 이하여야 합니다.'],
       minlength: [10, '10자 이상여야 합니다.'],
+      // validate: [validator.isAlpha, '투어 이름에는 문자만 포함되어야 합니다.'],
     },
     slug: String,
     duration: {
@@ -46,6 +48,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       validate: {
         validator: function (val) {
+          // this는 현재 문서만 가르킨다.
           return val < this.price; // 100 < 200
         },
         message: '할인가격은 판매가({VALUE}) 보다 낮으면 안됩니다.',
