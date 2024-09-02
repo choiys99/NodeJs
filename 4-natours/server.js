@@ -9,8 +9,8 @@ const DB = process.env.DATABASE.replace(
 );
 mongoose
   .connect(DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
   })
   .then(() => {
     // console.log(con.connections);
@@ -24,3 +24,4 @@ const port = process.env.PORT || 3000; // port 설정값이 없다면 기본값�
 app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
+

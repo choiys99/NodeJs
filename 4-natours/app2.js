@@ -18,10 +18,10 @@ if (process.env.NODE_ENV === 'development') {
 //3.미들웨어 설정
 
 app.use(express.json()); // json 형식의 요청 본문을 파싱..
-app.use(express.static(`${__dirname}/public`)); //
+app.use(express.static(`${__dirname}/public`));
+
 app.use((req, res, next) => {
   // 요청이 들어올 때 마다 실행
-  console.log('미들웨어 입니다.');
   req.requestTime = new Date().toISOString();
   next();
 });
@@ -32,5 +32,13 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter); // /api/v1/tours 경로로 들어오는 요청을 tourRouter 에 연결
 app.use('/api/v1/users', userRouter);
+
+// 경로 예외처리
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: '실패',
+    message: `찾을 수 없습니다 ${req.originalUrl} `,
+  });
+});
 
 module.exports = app;
