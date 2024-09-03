@@ -141,25 +141,22 @@ exports.getTour = async (req, res) => {
 //   },
 // });
 
-exports.createTour = async (req, res) => {
-  // const newTour = new Tour({})
-  // newTour.save()
-  try {
-    const newTour = await Tour.create(req.body);
-
-    res.status(201).json({
-      status: '성공',
-      data: {
-        tours: newTour,
-      },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: '실패',
-      message: err,
-    });
-  }
+const catchAsync = (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
 };
+
+exports.createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+
+  res.status(201).json({
+    status: '성공',
+    data: {
+      tours: newTour,
+    },
+  });
+});
 
 exports.deleteTour = async (req, res) => {
   try {

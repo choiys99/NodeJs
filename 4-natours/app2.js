@@ -2,6 +2,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controller/errorController');
 const userRouter = require('./routes/userRotues');
 const tourRouter = require('./routes/tourRoutes');
 
@@ -35,10 +37,18 @@ app.use('/api/v1/users', userRouter);
 
 // 경로 예외처리
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: '실패',
-    message: `찾을 수 없습니다 ${req.originalUrl} `,
-  });
+  // res.status(404).json({
+  //   status: '실패',
+  //   message: `찾을 수 없습니다 ${req.originalUrl} `,
+  // });
+
+  // const err = new Error(`찾을 수 없습니다 ${req.originalUrl} `);
+  // err.status = '실패';
+  // err.statusCode = 404;
+
+  next(new AppError(`찾을 수 없습니다 ${req.originalUrl} `, 404));
 });
+
+app.use(globalErrorHandler);
 
 module.exports = app;
