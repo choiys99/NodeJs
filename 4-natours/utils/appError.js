@@ -6,7 +6,7 @@ class AppError extends Error {
     this.status = `${statusCode}`.startsWith('4') ? '실패' : 'error'; // 4xx 상태 코드에 따라 'fail' 또는 'error' 설정
     this.isOperational = true; // 예상 가능한 운영적 에러 확인
 
-    // 스택 트레이스를 캡처하여 에러 객체에 추가
+    // 스택 트레이스를 캡처하여 에러 객체에 추가 (에러 발생위치를 추적)
     Error.captureStackTrace(this, this.constructor);
   }
 }
