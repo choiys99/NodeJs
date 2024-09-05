@@ -197,7 +197,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
       $sort: { avgPrice: 1 }, // 1 오름차순을 뜻한다
     },
     {
-      $match: { _id: { $ne: 'EASY' } }, // 지정된 id 값 제외 : EASY
+      // $match: { _id: { $ne: 'EASY' } }, // 지정된 id 값 제외 : EASY
     },
   ]);
 
