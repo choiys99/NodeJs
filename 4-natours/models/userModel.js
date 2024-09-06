@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, '비밀번호를 입력해주세요.'],
     minlength: 8,
+    select: false,
   },
 
   passwordConfirm: {
@@ -39,12 +40,12 @@ const userSchema = new mongoose.Schema({
     },
   },
 
-  phone: {
-    type: String,
-    unique: true,
-    trim: true,
-    required: [true, '번호를 입력해주세요'],
-  },
+  // phone: {
+  //   type: String,
+  //   unique: true,
+  //   trim: true,
+  //   required: [true, '번호를 입력해주세요'],
+  // },
 });
 
 userSchema.pre('save', async function (next) {
@@ -55,6 +56,13 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 
