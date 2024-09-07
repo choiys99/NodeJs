@@ -25,6 +25,8 @@ app.use(express.static(`${__dirname}/public`));
 app.use((req, res, next) => {
   // 요청이 들어올 때 마다 실행
   req.requestTime = new Date().toISOString();
+  console.log(req.headers);
+
   next();
 });
 

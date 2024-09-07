@@ -1,5 +1,6 @@
 const express = require('express');
 const tourController = require('./../controller/tourController');
+const authController = require('./../controller/authController');
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours) // 사용자가 인증되지 않으면 오류 발생
   .post(tourController.createTour);
 
 router

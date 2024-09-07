@@ -54,3 +54,23 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
   });
 });
+
+// 경로 보호
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1. 토큰가져오기 > 확인> 존재
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  // console.log('token :', token);
+  // 2. 토큰 검증
+
+  // 3. 유저가 존재 하는지 확인?
+
+  // 4. jwt 발급 후 사용자가 비밀번호를 변경 하였는지 확인
+
+  next();
+});
