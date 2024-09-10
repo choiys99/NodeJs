@@ -39,29 +39,33 @@ const userSchema = new mongoose.Schema({
       message: '동일한 비밀번호가 아닙니다.',
     },
   },
-
-  // phone: {
-  //   type: String,
-  //   unique: true,
-  //   trim: true,
-  //   required: [true, '번호를 입력해주세요'],
-  // },
+  passwordChangedAt: Date,
 });
 
+// 비밀번호 수정할때마다 암호화
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
-
   this.passwordConfirm = undefined;
+  // this.passwordChangedAt = Date.now();
   next();
 });
 
+//  입력된 비밀번호가 저장된 비밀번호와 일치하는지 확인
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    console.log(this.passwordChangedAt, JWTTimestamp);
+  }
+
+  return false; // 기본값으로 false 설정.. 유저가 비밀번호를 변경하지 않았음
 };
 
 const User = mongoose.model('User', userSchema);

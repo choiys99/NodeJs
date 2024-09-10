@@ -6,7 +6,6 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFieldsDB = (err) => {
-  // console.log(err.errmsg);
   const value = err.errorResponse.errmsg.match(/(["'])(\\?.)*?\1/)[0];
 
   const message = `Duplicate field value: ${value}. Please use another value!`;
@@ -19,6 +18,12 @@ const handleValidationErrorDB = (err) => {
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
+
+const handleJWTError = (err) =>
+  new AppError('잘못된 토큰입니다. 다시 로그인해 주세요', 401);
+
+const handleJWTExpired = (err) =>
+  new AppError('토큰이 만료 되었습니다. 다시 로그인해 주세요', 401);
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -71,7 +76,12 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'ValidationError') {
       error = handleValidationErrorDB(error);
     }
-
+    if (error.name === 'JsonWebTokenError') {
+      error = handleJWTError(error);
+    }
+    if (error.name === 'TokenExpiredError') {
+      error = handleJWTExpired(error);
+    }
     sendErrorProd(error, res);
   }
 };

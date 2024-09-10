@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('./../utils/catchAsync.js');
@@ -17,6 +18,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
 
   const token = signToken(newUser._id);
@@ -65,12 +67,31 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
   }
+  if (!token) {
+    return next(new AppError('로그인 해주세요', 401));
+  }
   // console.log('token :', token);
   // 2. 토큰 검증
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // 3. 유저가 존재 하는지 확인?
-
+  const freshUser = await User.findById(decoded.id);
+  if (!freshUser) {
+    return next(
+      new AppError('해당 유저 토큰이 더 이상 존재하지않습니다.', 401),
+    );
+  }
   // 4. jwt 발급 후 사용자가 비밀번호를 변경 하였는지 확인
+  freshUser.changedPasswordAfter(decoded.iat);
+  // {
+  //   return next(
+  //     new AppError(
+  //       '비밀번호가 최근에 변경되었습니다. 다시 로그인 해 주세요',
+  //       401,
+  //     ),
+  //   );
+  // }
 
+  // req.user = freshUser;
   next();
 });
