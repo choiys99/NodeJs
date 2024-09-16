@@ -76,6 +76,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false; // 기본값으로 false 설정.. 유저가 비밀번호를 변경하지 않았음
 };
 
+// 비밀번호 재설정 토큰을 생성하는 메서드
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 

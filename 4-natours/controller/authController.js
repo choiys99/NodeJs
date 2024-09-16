@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
@@ -150,4 +151,36 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-exports.resetPassword = (req, res, next) => {};
+
+// 비밀번호 변경하기
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1. 토큰을 기반으로 유저 확인
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  // 2. 토큰이 만료되지 않았고 사용자가 있는 경우
+  if (!user) {
+    return next(new AppError('토큰이 만료되었거나 유효하지 않습니다.', 400));
+  }
+  // 3.패스워드 업데이트
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save();
+  // 4.사용자 로그인하여 json 토큰을 클라이언트에게 보내기
+
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: '성공',
+    token,
+  });
+});
