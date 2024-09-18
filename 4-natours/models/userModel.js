@@ -52,11 +52,18 @@ const userSchema = new mongoose.Schema({
 
 // 비밀번호 수정할때마다 암호화
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return next(); // 수정안했으면 그냥 넘어감
 
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
   // this.passwordChangedAt = Date.now();
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next(); // 수정안했으면 그냥 넘어감
+
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 

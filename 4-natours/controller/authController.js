@@ -168,13 +168,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError('토큰이 만료되었거나 유효하지 않습니다.', 400));
   }
-  // 3.패스워드 업데이트
+  console.log('req.body :', req.body);
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
-
   await user.save();
+
+  // 3.패스워드at 속성 업데이트
   // 4.사용자 로그인하여 json 토큰을 클라이언트에게 보내기
 
   const token = signToken(user._id);
